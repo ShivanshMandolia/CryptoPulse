@@ -10,25 +10,24 @@ import Container from '@mui/material/Container';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useGetNewsQuery } from '../store/newsApi';
 
-// Define default crypto-related images for different news categories
+// Function to get default crypto-related image
 const getDefaultImage = (title = '') => {
   const lowerTitle = title.toLowerCase();
   if (lowerTitle.includes('bitcoin')) {
     return 'https://source.unsplash.com/400x200/?bitcoin';
-  } else if (lowerTitle.includes('mining')) {
-    return 'https://source.unsplash.com/400x200/?mining,computer';
-  } else if (lowerTitle.includes('trump')) {
-    return 'https://source.unsplash.com/400x200/?president,politics';
-  } else {
+  } else if (lowerTitle.includes('crypto')) {
     return 'https://source.unsplash.com/400x200/?cryptocurrency';
+  } else if (lowerTitle.includes('blockchain')) {
+    return 'https://source.unsplash.com/400x200/?blockchain';
+  } else {
+    return 'https://source.unsplash.com/400x200/?crypto,finance';
   }
 };
 
-const NewsCard = () => {
-  const { data: news, isLoading, error, isError } = useGetNewsQuery();
+const News = () => {
+  const { data, isLoading, error, isError } = useGetNewsQuery();
 
   if (isLoading) {
     return (
@@ -42,17 +41,23 @@ const NewsCard = () => {
     return (
       <Box p={2}>
         <Alert severity="error">
-          {error?.data?.message || 'Error loading news data. Please try again later.'}
+          {error?.message || 'Error loading news. Please try again later.'}
         </Alert>
       </Box>
     );
   }
 
+  // Debug logging
+  console.log('Received data:', data);
+
+  // Ensure data is an array
+  const articles = Array.isArray(data) ? data : [];
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Grid container spacing={3}>
-        {news?.map((article, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+        {articles.map((article, index) => (
+          <Grid item xs={12} sm={6} md={4} key={article.id || index}>
             <Card sx={{ 
               height: '100%', 
               display: 'flex', 
@@ -66,7 +71,7 @@ const NewsCard = () => {
               <CardMedia
                 component="img"
                 height="200"
-                image={article.urlToImage || getDefaultImage(article.title)}
+                image={article.urlToImage || article.imageUrl || getDefaultImage(article.title)}
                 alt={article.title}
                 sx={{
                   objectFit: 'cover',
@@ -74,7 +79,7 @@ const NewsCard = () => {
                 }}
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = 'https://placehold.co/400x200?text=News';
+                  e.target.src = getDefaultImage(article.title);
                 }}
               />
               <CardContent sx={{ flexGrow: 1 }}>
@@ -100,7 +105,6 @@ const NewsCard = () => {
               <CardActions>
                 <Button 
                   size="small" 
-                  endIcon={<OpenInNewIcon />}
                   href={article.url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -116,4 +120,4 @@ const NewsCard = () => {
   );
 };
 
-export default NewsCard;
+export default News;

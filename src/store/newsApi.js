@@ -1,26 +1,21 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// Define the API
+const apiKey = "cb92eb9d-b7d0-4a21-8064-f0d116510679";
+
 export const newsApi = createApi({
-  reducerPath: "newsApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://newsapi.org/v2/",
-  }),
-  endpoints: (builder) => ({
-    getNews: builder.query({
-      query: () => ({
-        url: "everything",
-        params: {
-          q: "cryptocurrency",
-          apiKey: "f7becb7ea20843eea9438d963e606b72", // Use your API key here
-          language: "en", // You can change language as needed
-          pageSize: 5, // Number of news articles to fetch per request
-        },
-      }),
-      transformResponse: (response) => response.articles, // You can adjust this based on your needs
-      keepUnusedDataFor: 60, // Cache the data for 60 seconds (adjust as needed)
+    reducerPath: 'newsApi',
+    baseQuery: fetchBaseQuery({
+        baseUrl: 'https://api.goperigon.com/v1/',
     }),
-  }),
+    endpoints: (builder) => ({
+        getNews: builder.query({
+            query: () => `all?apiKey=${apiKey}&title=crypto`,
+            transformResponse: (response) => {
+                // Check if response has a data array
+                return response.data || response.articles || response;
+            }
+        }),
+    }),
 });
 
 export const { useGetNewsQuery } = newsApi;
